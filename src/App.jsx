@@ -82,18 +82,21 @@ function App() {
         console.log('=== 날씨 API 응답 ===')
         console.log('전체 데이터:', data)
         console.log('예보 리스트 개수:', data.list?.length)
+        console.log('Timezone offset(초):', data.city?.timezone)
         
         // 날짜별로 날씨 데이터 그룹화
         const weatherByDate = {}
+        const timezoneOffsetSec = data.city?.timezone || 0
         
         data.list.forEach((item, index) => {
-          const date = new Date(item.dt * 1000)
-          const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+          // timezone offset을 적용한 로컬 시간 계산
+          const local = new Date((item.dt + timezoneOffsetSec) * 1000)
+          const dateKey = local.toISOString().split('T')[0]
           
           if (index < 3) {
             console.log(`예보 #${index + 1}:`, {
               timestamp: item.dt,
-              date: date.toLocaleString('ko-KR'),
+              localDate: local.toISOString(),
               dateKey: dateKey,
               temp: item.main.temp,
               weather: item.weather[0].main,
@@ -446,7 +449,7 @@ function App() {
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-2xl">{getWeatherIcon(dayWeather.icon)}</span>
                         <span className="text-sm font-medium text-gray-700">
-                          {dayWeather.tempMax}° / {dayWeather.tempMin}°
+                          {today ? '오늘(예보) ' : ''}{dayWeather.tempMax}° / {dayWeather.tempMin}°
                         </span>
                       </div>
                     )}
