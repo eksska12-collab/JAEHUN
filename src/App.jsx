@@ -98,7 +98,8 @@ function App() {
               timestamp: item.dt,
               localDate: local.toISOString(),
               dateKey: dateKey,
-              temp: item.main.temp,
+              temp_max: item.main.temp_max,
+              temp_min: item.main.temp_min,
               weather: item.weather[0].main,
               description: item.weather[0].description
             })
@@ -106,20 +107,23 @@ function App() {
           
           if (!weatherByDate[dateKey]) {
             weatherByDate[dateKey] = {
-              temps: [],
+              maxTemps: [],
+              minTemps: [],
               weather: item.weather[0],
               icon: item.weather[0].main
             }
           }
           
-          weatherByDate[dateKey].temps.push(item.main.temp)
+          weatherByDate[dateKey].maxTemps.push(item.main.temp_max)
+          weatherByDate[dateKey].minTemps.push(item.main.temp_min)
         })
         
         // 최고/최저 기온 계산
         Object.keys(weatherByDate).forEach(dateKey => {
-          const temps = weatherByDate[dateKey].temps
-          weatherByDate[dateKey].tempMax = Math.round(Math.max(...temps))
-          weatherByDate[dateKey].tempMin = Math.round(Math.min(...temps))
+          const maxTemps = weatherByDate[dateKey].maxTemps
+          const minTemps = weatherByDate[dateKey].minTemps
+          weatherByDate[dateKey].tempMax = Math.round(Math.max(...maxTemps))
+          weatherByDate[dateKey].tempMin = Math.round(Math.min(...minTemps))
         })
         
         console.log('=== 날짜별 날씨 데이터 ===')
@@ -128,7 +132,7 @@ function App() {
             icon: weatherByDate[dateKey].icon,
             tempMax: weatherByDate[dateKey].tempMax,
             tempMin: weatherByDate[dateKey].tempMin,
-            tempCount: weatherByDate[dateKey].temps.length
+            dataCount: weatherByDate[dateKey].maxTemps.length
           })
         })
         
